@@ -1,0 +1,9 @@
+template_path: veoibd.yaml
+stack_name: veoibd
+parameters:
+  # AWS batch requires the instance to have pre-installed packages.
+  # VEP installation
+  # Distibution: Amazon Linux.
+  ComputeImageId: ami-0a0966a44218e21ab
+  MainImage: sagebionetworks/genie:latest
+  MutationImage: sagebionetworks/genie:vcf2maf
