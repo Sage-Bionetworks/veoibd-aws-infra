@@ -1,0 +1,7 @@
+template_bucket_name: bootstrap-awss3cloudformationbucket-z6hnifi9i3p
+# Sender for notification hooks
+aws_account_name: Sandbox
+aws_account_email: aws.sandbox@sagebase.org
+# Provisioner defaults
+default_key_pair: "sandbox"
+default_vpc: "sandcastlevpc"
