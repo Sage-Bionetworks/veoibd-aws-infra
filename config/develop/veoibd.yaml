@@ -1,3 +1,4 @@
+---
 template_path: veoibd.yaml
 stack_name: veoibd
 parameters:
