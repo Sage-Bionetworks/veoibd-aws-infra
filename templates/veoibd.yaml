@@ -1,3 +1,4 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   Batch jobs for VEOIBD data validation.
@@ -104,7 +105,6 @@ Resources:
           - ContainerPath: "/root/.synapseCache"
             ReadOnly: false
             SourceVolume: synapsecache
-
 
 Outputs:
   BatchComputeEnvironment:
