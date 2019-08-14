@@ -10,6 +10,21 @@ Parameters:
   MainImage:
     Description: The Genie main processing and validation docker container image
     Type: String
+  Department:
+    Description: 'The department for this resource'
+    Type: String
+    AllowedPattern: '^\S*$'
+    ConstraintDescription: 'Must be string with no spaces'
+  Project:
+    Description: 'The name of the project that this resource is used for'
+    Type: String
+    AllowedPattern: '^\S*$'
+    ConstraintDescription: 'Must be string with no spaces'
+  OwnerEmail:
+    Description: 'Email address of the owner of this resource'
+    Type: String
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: 'Must be an acceptable email address syntax(i.e. joe.smith@sagebase.org)'
 
 Resources:
   BatchServiceRole:
@@ -67,6 +82,11 @@ Resources:
         InstanceTypes:
           - optimal
         DesiredvCpus: 8
+        Tags:
+          "Name": !Sub '${AWS::StackName}-BatchComputeEnvironment'
+          "Department": !Ref Department
+          "Project": !Ref Project
+          "OwnerEmail": !Ref OwnerEmail
   BatchJobQueue:
     Type: "AWS::Batch::JobQueue"
     Properties:
