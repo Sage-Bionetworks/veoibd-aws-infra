@@ -8,6 +8,6 @@ parameters:
   ComputeImageId: ami-082278746f893d99c
   MainImage: sagebionetworks/veoibd-validation-docker:latest
 
-  Department: "CompOnc"
+  Department: "SysBio"
   Project: "veoibd"
   OwnerEmail: "kenneth.daily@sagebase.org"
