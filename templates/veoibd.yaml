@@ -33,7 +33,7 @@ Parameters:
 Resources:
   MyCloudWatchLogGroup:
     Type: AWS::Logs::LogGroup
-    Properties: 
+    Properties:
       LogGroupName: '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
       RetentionInDays: 365
 
