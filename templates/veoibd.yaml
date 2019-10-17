@@ -123,11 +123,7 @@ Resources:
     Type: 'AWS::Batch::JobDefinition'
     Properties:
       Type: container
-      JobDefinitionName: !Join
-        - '-'
-        - - !Ref AWS::StackName
-          - "job"
-          - "mainprocess"
+      JobDefinitionName: !Sub '${AWS::Region}-${AWS::StackName}-MainBatchJob'
       ContainerProperties:
         Image: !Ref MainContainer
         Vcpus: 8
@@ -136,6 +132,28 @@ Resources:
           - python
           - input_to_database.py
           - main
+        Volumes:
+          - Host:
+              SourcePath: "/home/ec2-user/.synapseCache"
+            Name: synapsecache
+        MountPoints:
+          - ContainerPath: "/root/.synapseCache"
+            ReadOnly: false
+            SourceVolume: synapsecache
+  ValidateBatchJob:
+    Type: 'AWS::Batch::JobDefinition'
+    Properties:
+      Type: container
+      JobDefinitionName: !Sub '${AWS::Region}-${AWS::StackName}-ValidateBatchJob'
+      ContainerProperties:
+        Image: !Ref MainContainer
+        Vcpus: 8
+        Memory: 8000
+        Command:
+          - python
+          - input_to_database.py
+          - main
+          - --onlyValidate
         Volumes:
           - Host:
               SourcePath: "/home/ec2-user/.synapseCache"
@@ -162,3 +180,7 @@ Outputs:
     Value: !Ref MainBatchJob
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-MainBatchJob'
+  ValidateBatchJob:
+    Value: !Ref MainBatchJob
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ValidateBatchJob'
