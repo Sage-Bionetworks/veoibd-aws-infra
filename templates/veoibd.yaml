@@ -150,7 +150,6 @@ Resources:
         Vcpus: 8
         Memory: 8000
         Command:
-          - python
           - input_to_database.py
           - main
           - --onlyValidate
