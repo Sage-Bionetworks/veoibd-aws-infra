@@ -99,12 +99,12 @@ Resources:
         MaxvCpus: 256
         SecurityGroupIds:
           - Fn::ImportValue:
-              !Sub '{AWS::Region}-${VpcName}-VpnSecurityGroup'
+              !Sub '${AWS::Region}-${VpcName}-VpnSecurityGroup'
         Subnets:
           - Fn::ImportValue:
-              !Sub '{AWS::Region}-${VpcName}-PrivateSubnet1'
+              !Sub '${AWS::Region}-${VpcName}-PrivateSubnet1'
           - Fn::ImportValue:
-              !Sub '{AWS::Region}-${VpcName}-PrivateSubnet2'
+              !Sub '${AWS::Region}-${VpcName}-PrivateSubnet2'
         MinvCpus: 0
         ImageId: !Ref ComputeImageId
         InstanceRole: !GetAtt BatchInstanceProfile.Arn
