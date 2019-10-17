@@ -4,10 +4,14 @@ Description: >-
   Batch jobs for VEOIBD data validation.
 
 Parameters:
+  VpcName:
+    Description: The name of the VPC to use for this Batch environment.
+    Type: String
+    AllowedValues: ["computevpc", "sandcastlevpc"]
   ComputeImageId:
     Description: The Genie compute resource image ID
     Type: 'AWS::EC2::Image::Id'
-  MainImage:
+  MainContainer:
     Description: The Genie main processing and validation docker container image
     Type: String
   Department:
@@ -27,6 +31,26 @@ Parameters:
     ConstraintDescription: 'Must be an acceptable email address syntax(i.e. joe.smith@sagebase.org)'
 
 Resources:
+  MyCloudWatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
+      RetentionInDays: 365
+
+  PublishToCloudwatchPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'logs:DescribeLogGroups'
+            Resource: !GetAtt MyCloudWatchLogGroup.Arn
+
   BatchServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -41,18 +65,6 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Path: "/"
-      Policies:
-        - PolicyName: PublishToCloudwatch
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                  - 'logs:DescribeLogGroups'
-                Resource: 'arn:aws:logs:*:*:*'
   BatchInstanceRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -83,11 +95,10 @@ Resources:
         Type: EC2
         MaxvCpus: 256
         SecurityGroupIds:
-          - !ImportValue us-east-1-computevpc-VpnSecurityGroup
+          - !ImportValue {!Sub '{AWS::Region}-${VpcName}-VpnSecurityGroup'}
         Subnets:
-          - !ImportValue us-east-1-computevpc-PrivateSubnet
-          - !ImportValue us-east-1-computevpc-PrivateSubnet1
-          - !ImportValue us-east-1-computevpc-PrivateSubnet2
+          - !ImportValue {!Sub '{AWS::Region}-${VpcName}-PrivateSubnet1'}
+          - !ImportValue {!Sub '{AWS::Region}-${VpcName}-PrivateSubnet2'}
         MinvCpus: 0
         ImageId: !Ref ComputeImageId
         InstanceRole: !GetAtt BatchInstanceProfile.Arn
@@ -95,18 +106,14 @@ Resources:
           - optimal
         DesiredvCpus: 8
         Tags:
-          "Name": !Sub '${AWS::StackName}-BatchComputeEnvironment'
+          "Name": !Sub '${AWS::Region}-${AWS::StackName}-BatchComputeEnvironment'
           "Department": !Ref Department
           "Project": !Ref Project
           "OwnerEmail": !Ref OwnerEmail
   BatchJobQueue:
     Type: "AWS::Batch::JobQueue"
     Properties:
-      JobQueueName: !Join
-        - '-'
-        - - !Ref AWS::StackName
-          - "job"
-          - "queue"
+      JobQueueName: !Sub '${AWS::Region}-${AWS::StackName}-BatchJobQueue'
       ComputeEnvironmentOrder:
         - ComputeEnvironment: !Ref BatchComputeEnvironment
           Order: 1
@@ -122,7 +129,7 @@ Resources:
           - "job"
           - "mainprocess"
       ContainerProperties:
-        Image: !Ref MainImage
+        Image: !Ref MainContainer
         Vcpus: 8
         Memory: 8000
         Command:
@@ -139,6 +146,10 @@ Resources:
             SourceVolume: synapsecache
 
 Outputs:
+  MyCloudWatchLogGroup:
+    Value: !Ref MyCloudWatchLogGroup
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
   BatchComputeEnvironment:
     Value: !Ref BatchComputeEnvironment
     Export:

@@ -1,14 +1,14 @@
 ---
 template_path: veoibd.yaml
-stack_name: veoibd
+stack_name: veoibd-develop
 parameters:
   # AWS batch requires the instance to have pre-installed packages.
   # VEP installation
   # Distibution: Amazon Linux.
   ComputeImageId: ami-082278746f893d99c
-  MainImage: sagebionetworks/veoibd-validation-docker:latest
+  MainContainer: sagebionetworks/veoibd-validation-docker:latest
 
   Department: "SysBio"
   Project: "veoibd"
   OwnerEmail: "kenneth.daily@sagebase.org"
-
+  VpcName: "sandcastlevpc"
