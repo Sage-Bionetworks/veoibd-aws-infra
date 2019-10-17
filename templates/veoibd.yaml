@@ -34,12 +34,13 @@ Resources:
   MyCloudWatchLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
+      LogGroupName: !Sub '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
       RetentionInDays: 365
 
   PublishToCloudwatchPolicy:
     Type: "AWS::IAM::Policy"
     Properties:
+      PolicyName: !Sub '${AWS::Region}-${AWS::StackName}-PublishToCloudwatchPolicy'
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -50,6 +51,8 @@ Resources:
               - 'logs:PutLogEvents'
               - 'logs:DescribeLogGroups'
             Resource: !GetAtt MyCloudWatchLogGroup.Arn
+      Roles:
+        - !Ref BatchInstanceRole
 
   BatchServiceRole:
     Type: "AWS::IAM::Role"
@@ -95,10 +98,13 @@ Resources:
         Type: EC2
         MaxvCpus: 256
         SecurityGroupIds:
-          - !ImportValue {!Sub '{AWS::Region}-${VpcName}-VpnSecurityGroup'}
+          - Fn::ImportValue:
+              !Sub '{AWS::Region}-${VpcName}-VpnSecurityGroup'
         Subnets:
-          - !ImportValue {!Sub '{AWS::Region}-${VpcName}-PrivateSubnet1'}
-          - !ImportValue {!Sub '{AWS::Region}-${VpcName}-PrivateSubnet2'}
+          - Fn::ImportValue:
+              !Sub '{AWS::Region}-${VpcName}-PrivateSubnet1'
+          - Fn::ImportValue:
+              !Sub '{AWS::Region}-${VpcName}-PrivateSubnet2'
         MinvCpus: 0
         ImageId: !Ref ComputeImageId
         InstanceRole: !GetAtt BatchInstanceProfile.Arn
