@@ -1,10 +1,10 @@
 # Overview
-Infrastructure for the [GENIE](https://github.com/Sage-Bionetworks/Genie)
-application.
+Infrastructure for the [VEO-IBD Genie](https://github.com/veo-ibd/Genie) application.
 
+It uses a Docker image based on a `Dockerfile` from [Sage-Bionetworks/veoibd-validation-docker](https://github.com/Sage-Bionetworks/veoibd-validation-docker).
 
 # Purpose
-This repo contains infrastructure templates for the GENIE batch jobs. 
+This repository contains CloudFormation infrastructure templates for the GENIE batch jobs.
 
 * validation
 * input to database
