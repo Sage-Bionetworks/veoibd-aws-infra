@@ -34,13 +34,11 @@ Resources:
   MyCloudWatchLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
       RetentionInDays: 365
 
   PublishToCloudwatchPolicy:
     Type: "AWS::IAM::Policy"
     Properties:
-      PolicyName: !Sub '${AWS::Region}-${AWS::StackName}-PublishToCloudwatchPolicy'
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -112,14 +110,14 @@ Resources:
           - optimal
         DesiredvCpus: 8
         Tags:
-          "Name": !Sub '${AWS::Region}-${AWS::StackName}-BatchComputeEnvironment'
+          "Name": !Sub '${AWS::StackName}-BatchComputeEnvironment'
           "Department": !Ref Department
           "Project": !Ref Project
           "OwnerEmail": !Ref OwnerEmail
   BatchJobQueue:
     Type: "AWS::Batch::JobQueue"
     Properties:
-      JobQueueName: !Sub '${AWS::Region}-${AWS::StackName}-BatchJobQueue'
+      JobQueueName: !Sub '${AWS::StackName}-BatchJobQueue'
       ComputeEnvironmentOrder:
         - ComputeEnvironment: !Ref BatchComputeEnvironment
           Order: 1
@@ -129,7 +127,7 @@ Resources:
     Type: 'AWS::Batch::JobDefinition'
     Properties:
       Type: container
-      JobDefinitionName: !Sub '${AWS::Region}-${AWS::StackName}-MainBatchJob'
+      JobDefinitionName: !Sub '${AWS::StackName}-MainBatchJob'
       ContainerProperties:
         Image: !Ref MainContainer
         Vcpus: 8
@@ -150,7 +148,7 @@ Resources:
     Type: 'AWS::Batch::JobDefinition'
     Properties:
       Type: container
-      JobDefinitionName: !Sub '${AWS::Region}-${AWS::StackName}-ValidateBatchJob'
+      JobDefinitionName: !Sub '${AWS::StackName}-ValidateBatchJob'
       ContainerProperties:
         Image: !Ref MainContainer
         Vcpus: 8
