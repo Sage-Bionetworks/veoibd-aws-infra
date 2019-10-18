@@ -117,7 +117,6 @@ Resources:
   BatchJobQueue:
     Type: "AWS::Batch::JobQueue"
     Properties:
-      JobQueueName: !Sub '${AWS::StackName}-BatchJobQueue'
       ComputeEnvironmentOrder:
         - ComputeEnvironment: !Ref BatchComputeEnvironment
           Order: 1
@@ -127,7 +126,6 @@ Resources:
     Type: 'AWS::Batch::JobDefinition'
     Properties:
       Type: container
-      JobDefinitionName: !Sub '${AWS::StackName}-MainBatchJob'
       ContainerProperties:
         Image: !Ref MainContainer
         Vcpus: 8
@@ -148,7 +146,6 @@ Resources:
     Type: 'AWS::Batch::JobDefinition'
     Properties:
       Type: container
-      JobDefinitionName: !Sub '${AWS::StackName}-ValidateBatchJob'
       ContainerProperties:
         Image: !Ref MainContainer
         Vcpus: 8
