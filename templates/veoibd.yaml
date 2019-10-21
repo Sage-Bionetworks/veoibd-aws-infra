@@ -57,7 +57,7 @@ Resources:
     Properties:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
-        - !GetAtt PublishToCloudwatchPolicy.Arn
+        - !Ref PublishToCloudwatchPolicy
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
