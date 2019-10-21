@@ -37,7 +37,7 @@ Resources:
       RetentionInDays: 365
 
   PublishToCloudwatchPolicy:
-    Type: "AWS::IAM::Policy"
+    Type: "AWS::IAM::ManagedPolicy"
     Properties:
       PolicyDocument:
         Version: 2012-10-17
@@ -57,6 +57,7 @@ Resources:
     Properties:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+        - !Ref PublishToCloudwatchPolicy
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
