@@ -2,7 +2,6 @@
 template_path: veoibd.yaml
 stack_name: veoibd
 parameters:
-  ComputeImageId: ami-082278746f893d99c
   MainContainer: sagebionetworks/veoibd-validation-docker:latest
   Department: "SysBio"
   Project: "veoibd"

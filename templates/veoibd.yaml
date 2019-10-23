@@ -8,9 +8,6 @@ Parameters:
     Description: The name of the VPC to use for this Batch environment.
     Type: String
     AllowedValues: ["computevpc", "sandcastlevpc"]
-  ComputeImageId:
-    Description: The Genie compute resource image ID
-    Type: 'AWS::EC2::Image::Id'
   MainContainer:
     Description: The Genie main processing and validation docker container image
     Type: String
@@ -105,7 +102,6 @@ Resources:
           - Fn::ImportValue:
               !Sub '${AWS::Region}-${VpcName}-PrivateSubnet2'
         MinvCpus: 0
-        ImageId: !Ref ComputeImageId
         InstanceRole: !GetAtt BatchInstanceProfile.Arn
         InstanceTypes:
           - optimal
