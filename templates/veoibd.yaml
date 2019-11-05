@@ -64,7 +64,7 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Path: "/"
-  
+
   BatchInstanceRole:
     Type: "AWS::IAM::Role"
     Properties:
