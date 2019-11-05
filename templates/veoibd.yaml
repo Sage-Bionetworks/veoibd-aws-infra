@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  Batch jobs for VEOIBD data validation. These run on a scheduled basis.
+  Batch jobs for VEOIBD data validation. These run on a scheduled basis and login using the secrets manager.
 
 Parameters:
   VpcName:
@@ -64,7 +64,7 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Path: "/"
-  
+
   BatchInstanceRole:
     Type: "AWS::IAM::Role"
     Properties:
