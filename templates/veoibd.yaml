@@ -130,9 +130,7 @@ Resources:
         Vcpus: 8
         Memory: 8000
         Command:
-          - python
-          - input_to_database.py
-          - main
+          - /input_to_database.sh
         Volumes:
           - Host:
               SourcePath: "/home/ec2-user/.synapseCache"
@@ -150,9 +148,7 @@ Resources:
         Vcpus: 8
         Memory: 8000
         Command:
-          - input_to_database.py
-          - main
-          - --onlyValidate
+          - /validate.sh
         Volumes:
           - Host:
               SourcePath: "/home/ec2-user/.synapseCache"
