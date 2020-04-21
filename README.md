@@ -8,9 +8,6 @@ This repository contains CloudFormation infrastructure templates for the GENIE b
 
 * validation
 * input to database
-* database to staging
-* release
-
 
 ## Continuous Integration
 We have configured Travis to deploy CF template updates.  Travis deploys using
