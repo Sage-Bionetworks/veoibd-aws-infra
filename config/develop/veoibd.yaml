@@ -5,5 +5,5 @@ parameters:
   MainContainer: sagebionetworks/veoibd-validation-docker:latest
   Department: "SysBio"
   Project: "veoibd"
-  OwnerEmail: "kenneth.daily@sagebase.org"
+  OwnerEmail: "larsson.omberg@sagebase.org"
   VpcName: "sandcastlevpc"
