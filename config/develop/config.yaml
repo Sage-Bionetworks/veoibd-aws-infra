@@ -4,4 +4,3 @@ aws_account_name: Sandbox
 aws_account_email: aws.sandbox@sagebase.org
 # Provisioner defaults
 default_key_pair: "sandbox"
-default_vpc: "sandcastlevpc"

@@ -1,13 +1,14 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  Batch jobs for VEOIBD data validation.
+  Batch jobs for VEOIBD data validation. These run on a scheduled basis and login using the secrets manager.
 
 Parameters:
-  ComputeImageId:
-    Description: The Genie compute resource image ID
-    Type: 'AWS::EC2::Image::Id'
-  MainImage:
+  VpcName:
+    Description: The name of the VPC to use for this Batch environment.
+    Type: String
+    AllowedValues: ["computevpc", "sandcastlevpc"]
+  MainContainer:
     Description: The Genie main processing and validation docker container image
     Type: String
   Department:
@@ -27,11 +28,33 @@ Parameters:
     ConstraintDescription: 'Must be an acceptable email address syntax(i.e. joe.smith@sagebase.org)'
 
 Resources:
+  MyCloudWatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 365
+
+  PublishToCloudwatchPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'logs:DescribeLogGroups'
+            Resource: !GetAtt MyCloudWatchLogGroup.Arn
+      Roles:
+        - !Ref BatchInstanceRole
+
   BatchServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+        - !Ref PublishToCloudwatchPolicy
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -41,23 +64,13 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Path: "/"
-      Policies:
-        - PolicyName: PublishToCloudwatch
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                  - 'logs:DescribeLogGroups'
-                Resource: 'arn:aws:logs:*:*:*'
+
   BatchInstanceRole:
     Type: "AWS::IAM::Role"
     Properties:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -83,13 +96,14 @@ Resources:
         Type: EC2
         MaxvCpus: 256
         SecurityGroupIds:
-          - !ImportValue us-east-1-computevpc-VpnSecurityGroup
+          - Fn::ImportValue:
+              !Sub '${AWS::Region}-${VpcName}-VpnSecurityGroup'
         Subnets:
-          - !ImportValue us-east-1-computevpc-PrivateSubnet
-          - !ImportValue us-east-1-computevpc-PrivateSubnet1
-          - !ImportValue us-east-1-computevpc-PrivateSubnet2
+          - Fn::ImportValue:
+              !Sub '${AWS::Region}-${VpcName}-PrivateSubnet1'
+          - Fn::ImportValue:
+              !Sub '${AWS::Region}-${VpcName}-PrivateSubnet2'
         MinvCpus: 0
-        ImageId: !Ref ComputeImageId
         InstanceRole: !GetAtt BatchInstanceProfile.Arn
         InstanceTypes:
           - optimal
@@ -102,11 +116,6 @@ Resources:
   BatchJobQueue:
     Type: "AWS::Batch::JobQueue"
     Properties:
-      JobQueueName: !Join
-        - '-'
-        - - !Ref AWS::StackName
-          - "job"
-          - "queue"
       ComputeEnvironmentOrder:
         - ComputeEnvironment: !Ref BatchComputeEnvironment
           Order: 1
@@ -116,19 +125,30 @@ Resources:
     Type: 'AWS::Batch::JobDefinition'
     Properties:
       Type: container
-      JobDefinitionName: !Join
-        - '-'
-        - - !Ref AWS::StackName
-          - "job"
-          - "mainprocess"
       ContainerProperties:
-        Image: !Ref MainImage
+        Image: !Ref MainContainer
         Vcpus: 8
         Memory: 8000
         Command:
-          - python
-          - input_to_database.py
-          - main
+          - /input_to_database.sh
+        Volumes:
+          - Host:
+              SourcePath: "/home/ec2-user/.synapseCache"
+            Name: synapsecache
+        MountPoints:
+          - ContainerPath: "/root/.synapseCache"
+            ReadOnly: false
+            SourceVolume: synapsecache
+  ValidateBatchJob:
+    Type: 'AWS::Batch::JobDefinition'
+    Properties:
+      Type: container
+      ContainerProperties:
+        Image: !Ref MainContainer
+        Vcpus: 8
+        Memory: 8000
+        Command:
+          - /validate.sh
         Volumes:
           - Host:
               SourcePath: "/home/ec2-user/.synapseCache"
@@ -139,6 +159,10 @@ Resources:
             SourceVolume: synapsecache
 
 Outputs:
+  MyCloudWatchLogGroup:
+    Value: !Ref MyCloudWatchLogGroup
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-CloudWatchLogGroup'
   BatchComputeEnvironment:
     Value: !Ref BatchComputeEnvironment
     Export:
@@ -151,3 +175,7 @@ Outputs:
     Value: !Ref MainBatchJob
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-MainBatchJob'
+  ValidateBatchJob:
+    Value: !Ref MainBatchJob
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ValidateBatchJob'
